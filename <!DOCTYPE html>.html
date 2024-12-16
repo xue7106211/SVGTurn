@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVG尺寸调整工具</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .title {
+            color: #2c3e50;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .upload-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .preview-section {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        #output {
+            margin-top: 20px;
+        }
+        #output pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        .btn-primary {
+            background-color: #3498db;
+            border-color: #3498db;
+            margin-right: 10px;
+        }
+        .btn-primary:hover {
+            background-color: #2980b9;
+            border-color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">SVG尺寸调整工具</h1>
+        
+        <div class="upload-section">
+            <div class="mb-3">
+                <label for="fileInput" class="form-label">选择SVG文件</label>
+                <input type="file" class="form-control" id="fileInput" accept=".svg">
+            </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-primary" onclick="processSVG()">
+                    <i class="bi bi-arrow-repeat"></i> 转换
+                </button>
+                <button class="btn btn-success" onclick="downloadSVG()">
+                    <i class="bi bi-download"></i> 下载SVG
+                </button>
+            </div>
+        </div>
+
+        <div id="output" class="preview-section"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let convertedSVG = '';
+
+        function processSVG() {
+            const fileInput = document.getElementById('fileInput');
+            const output = document.getElementById('output');
+            
+            if (!fileInput.files.length) {
+                alert('请选择一个SVG文件');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                let svgContent = e.target.result;
+                
+                svgContent = svgContent.replace(/width="[^"]*"/g, 'width="1em"');
+                svgContent = svgContent.replace(/height="[^"]*"/g, 'height="1em"');
+                
+                convertedSVG = svgContent;
+                
+                output.innerHTML = `
+                    <h4 class="mb-3">转换后的SVG代码：</h4>
+                    <pre class="mb-4">${svgContent.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>
+                    <h4 class="mb-3">预览：</h4>
+                    <div class="bg-light p-3 rounded">${svgContent}</div>
+                `;
+            };
+
+            reader.readAsText(file);
+        }
+
+        function downloadSVG() {
+            if (!convertedSVG) {
+                alert('请先转换SVG文件');
+                return;
+            }
+
+            const blob = new Blob([convertedSVG], { type: 'image/svg+xml' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'converted.svg';
+            
+            document.body.appendChild(a);
+            a.click();
+            
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        }
+    </script>
+</body>
+</html>
